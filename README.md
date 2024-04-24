@@ -1,5 +1,11 @@
 # Ytspot
 
+Goofy ahh angular web app for mixing yt playlist and spotify playlist. 
+
+## Features:
+    * Put a public spotify and youtube playlist and a queue will be made, automatically shuffled. 
+    * API sever is this -> [ytspotServer](https://github.com/laefy13/ytspotServer)
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.2.
 
 ## Development server
