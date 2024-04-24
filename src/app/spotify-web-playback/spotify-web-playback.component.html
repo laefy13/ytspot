@@ -1,0 +1,36 @@
+<div class="w-full pb-10">
+  <div
+    class="login flex flex-col justify-center text-center"
+    *ngIf="access_token == null"
+  >
+    Need to login first to use Spotify webplayback
+    <a [href]="api_link + 'auth/login'">Login</a>
+  </div>
+  <div
+    class="image flex justify-center items-center flex-col w-full"
+    *ngIf="access_token"
+  >
+    <button class="logout" (click)="logout()">logout</button>
+    <div
+      class="image flex justify-center relative items-center w-full"
+      [ngClass]="update_class ? 'h-50' : 'h-30vh w-30vh'"
+    >
+      <img
+        class="border border-lightgreen rounded-lg"
+        [ngClass]="
+          !spot_to_yt
+            ? 'h-50 w-full'
+            : update_class
+            ? 'animate-fadeOut h-50 w-30vh'
+            : 'animate-fadeIn h-30vh w-30vh'
+        "
+        [src]="img_url"
+        alt="Empty"
+      />
+      <app-loading
+        [is_loading]="!device_ready"
+        [additional_text]="'Spotify Device loading'"
+      />
+    </div>
+  </div>
+</div>
