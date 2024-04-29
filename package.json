@@ -7,7 +7,12 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:ytspot": "node dist/ytspot/server/server.mjs"
+    "serve:ssr:ytspot": "node dist/ytspot/server/server.mjs",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "swa:start": "swa start app",
+    "swa:login": "swa deploy app",
+    "swa:deploy": "swa login"
   },
   "private": true,
   "dependencies": {
