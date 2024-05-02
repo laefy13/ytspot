@@ -1,6 +1,7 @@
 # Ytspot
 
-Goofy ahh angular web app for mixing yt playlist and spotify playlist. 
+Goofy ahh angular web app for mixing yt playlist and spotify playlist.
+Deployed here -> https://lemon-grass-0b1c6b800.5.azurestaticapps.net/
 
 ## Features:
    * Put a public spotify and youtube playlist and a queue will be made, automatically shuffled. 
