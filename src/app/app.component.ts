@@ -129,7 +129,6 @@ export class AppComponent {
       this.addQueue();
     }
   }
-
   updatePlaying(is_playing: boolean, player_type: number) {
     if (
       (this.playing[1] === 1 && player_type === 0) ||
@@ -276,6 +275,9 @@ export class AppComponent {
         }
       },
     });
+  }
+  clearInput(link: FormControl) {
+    link.setValue('');
   }
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.queue, event.previousIndex, event.currentIndex);

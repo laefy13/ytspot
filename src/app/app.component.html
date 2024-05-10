@@ -16,10 +16,11 @@
                 type="text"
                 id="success"
                 [ngClass]="spotify_loading ? 'shadow-md opacity-20' : ''"
-                class="bg-green w-full border border-green text-green dark:text-green placeholder-green dark:placeholder-red text-sm rounded-lg focus:ring-red focus:border-green block p-2.5 dark:bg-transparent dark:border-green"
+                class="bg-green w-full border border-green text-green dark:text-green placeholder-green dark:placeholder-green text-sm rounded-lg focus:ring-red focus:border-green block p-2.5 dark:bg-transparent dark:border-green"
                 placeholder="Spotify playlist Link"
                 [formControl]="spotify_link"
                 value="https://open.spotify.com/playlist/1gKIYxGVZBUpkmqamRa60w?si=655b6326c62f4a51"
+                (click)="clearInput(spotify_link)"
                 [readonly]="spotify_loading"
               />
 
@@ -64,6 +65,7 @@
                   'https://youtube.com/playlist?list=PL4xFhy5pDwEiI2FWxPOBpdwiY-Ju5uIZW&si=Amms7BzTLGVt5Reo'
                 "
                 [readonly]="youtube_loading"
+                (click)="clearInput(youtube_link)"
               />
               <app-loading [is_loading]="youtube_loading" />
             </div>
