@@ -7,6 +7,7 @@ import * as store from 'store2';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { LoadingComponent } from '../loading/loading.component';
 import { environment } from '../../environments/environment';
+import { FormsModule } from '@angular/forms';
 declare global {
   interface Window {
     Spotify: any;
@@ -17,7 +18,7 @@ declare global {
 @Component({
   selector: 'app-spotify-web-playback',
   standalone: true,
-  imports: [CommonModule, LoadingComponent],
+  imports: [CommonModule, LoadingComponent, FormsModule],
   templateUrl: './spotify-web-playback.component.html',
   styleUrl: './spotify-web-playback.component.css',
 })
@@ -29,7 +30,7 @@ export class SpotifyWebPlaybackComponent implements OnInit {
   player: any;
   api_link = environment.API_URL;
   access_token = null;
-  // is_updated: boolean=false;
+  spotify_volume = 50;
   private position_changed = false;
   device_ready = false;
   spot_to_yt = false;
@@ -113,13 +114,13 @@ export class SpotifyWebPlaybackComponent implements OnInit {
       this.player.connect().then((success: any) => {
         if (success) {
           this.device_ready = true;
+          this.updateVolume();
         }
       });
       this.player.addListener(
         'player_state_changed',
         ({ position, duration, track_window: { current_track } }: any) => {
           if (position > 0) {
-            // this.position_changed = true;
             this.player.getCurrentState().then((state: any) => {
               if (!state) return;
               if (!state.paused) {
@@ -130,7 +131,6 @@ export class SpotifyWebPlaybackComponent implements OnInit {
           if (this.position_changed && position === 0) {
             this.positionChange(false);
             this.spotifyService.updateCurrentTrackId();
-            // }
           }
         }
       );
@@ -170,5 +170,8 @@ export class SpotifyWebPlaybackComponent implements OnInit {
       return match[1];
     }
     return '';
+  }
+  updateVolume() {
+    this.player.setVolume(this.spotify_volume / 100);
   }
 }

@@ -36,6 +36,7 @@ export class YtserviceService {
 
   private createPlayer(observer: Observer<any>): void {
     this.player = new YT.Player('youtube-player', {
+      playerVars: { controls: 0 },
       events: {
         onReady: (event: any) => observer.next(event.target),
         onError: (event: any) => observer.error(event.data),

@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { YtserviceService } from '../services/ytservice.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-youtube-web-playback',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './youtube-web-playback.component.html',
   styleUrl: './youtube-web-playback.component.css',
 })
@@ -12,6 +13,7 @@ export class YoutubeWebPlaybackComponent {
   player: any;
   youtube_loop: boolean = false;
   youtube_shuffle: boolean = false;
+  youtube_volume = 50;
 
   constructor(private ytService: YtserviceService) {}
   pauseVideo() {
@@ -35,10 +37,14 @@ export class YoutubeWebPlaybackComponent {
   stopVideo() {
     this.player.stopVideo();
   }
+  updateVolume() {
+    this.player.setVolume(this.youtube_volume);
+  }
   ngOnInit(): void {
     this.ytService.loadPlayer().subscribe(
       (player: any) => {
         this.player = player;
+        this.player.setVolume(this.youtube_volume);
       },
       () => {
         console.error('Error loading YouTube player:');
