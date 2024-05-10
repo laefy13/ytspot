@@ -277,7 +277,13 @@ export class AppComponent {
     });
   }
   clearInput(link: FormControl) {
-    link.setValue('');
+    if (
+      link.value ===
+        'https://open.spotify.com/playlist/1gKIYxGVZBUpkmqamRa60w?si=655b6326c62f4a51' ||
+      link.value ===
+        'https://youtube.com/playlist?list=PL4xFhy5pDwEiI2FWxPOBpdwiY-Ju5uIZW&si=Amms7BzTLGVt5Reo'
+    )
+      link.setValue('');
   }
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.queue, event.previousIndex, event.currentIndex);
