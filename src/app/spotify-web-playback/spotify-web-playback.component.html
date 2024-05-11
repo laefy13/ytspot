@@ -4,13 +4,49 @@
     *ngIf="access_token == null"
   >
     Need to login first to use Spotify webplayback
-    <a [href]="api_link + 'auth/login'">Login</a>
+    <a [href]="api_link + 'auth/login'">
+      <button
+        type="button"
+        class="w-3/12 focus:outline-none text-white bg-green hover:bg-green focus:ring-4 focus:ring-green font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green dark:hover:bg-green dark:focus:ring-green"
+      >
+        Login
+      </button></a
+    >
   </div>
+
   <div
     class="image flex justify-center items-center flex-col w-full"
     *ngIf="access_token"
   >
-    <button class="logout" (click)="logout()">logout</button>
+    <button
+      class="logout w-3/12 focus:outline-none text-white bg-green hover:bg-green focus:ring-4 focus:ring-green font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green dark:hover:bg-green dark:focus:ring-green"
+      (click)="logout()"
+    >
+      logout
+    </button>
+    <div class="relative mb-6 w-full">
+      <input
+        id="minmax-range"
+        type="range"
+        min="0"
+        max="100"
+        [(ngModel)]="spotify_volume"
+        (change)="updateVolume()"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+      />
+      <span
+        class="text-sm text-gray-500 dark:text-gray-400 absolute start-0 -bottom-6"
+        >0</span
+      >
+      <span
+        class="text-sm text-gray-500 dark:text-gray-400 absolute start-1/2 -translate-x-1/2 rtl:translate-x-1/2 -bottom-6"
+        >50</span
+      >
+      <span
+        class="text-sm text-gray-500 dark:text-gray-400 absolute end-0 -bottom-6"
+        >100</span
+      >
+    </div>
     <div
       class="image flex justify-center relative items-center w-full"
       [ngClass]="update_class ? 'h-50' : 'h-30vh w-30vh'"
@@ -32,28 +68,5 @@
         [additional_text]="'Spotify Device loading'"
       />
     </div>
-  </div>
-  <div class="relative mb-6">
-    <input
-      id="minmax-range"
-      type="range"
-      min="0"
-      max="100"
-      [(ngModel)]="spotify_volume"
-      (change)="updateVolume()"
-      class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-    />
-    <span
-      class="text-sm text-gray-500 dark:text-gray-400 absolute start-0 -bottom-6"
-      >0</span
-    >
-    <span
-      class="text-sm text-gray-500 dark:text-gray-400 absolute start-1/2 -translate-x-1/2 rtl:translate-x-1/2 -bottom-6"
-      >50</span
-    >
-    <span
-      class="text-sm text-gray-500 dark:text-gray-400 absolute end-0 -bottom-6"
-      >100</span
-    >
   </div>
 </div>

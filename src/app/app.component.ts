@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {
   HttpClient,
@@ -75,8 +75,10 @@ export class AppComponent {
   spotify_queue = false;
   youtube_loading = false;
   previous_songs: [number, string, string, string][] = [];
-
   api_link = environment.API_URL;
+  isMobile: boolean = false;
+  showControllers: boolean = true;
+  timer: any;
 
   constructor(
     private http: HttpClient,
@@ -89,15 +91,29 @@ export class AppComponent {
     this.ytService.currentPlayerTrackId$.subscribe(() => {
       if (this.playing[1] === 0) this.nextSong();
     });
+
+    this.checkIfMobile();
   }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkIfMobile();
+  }
+
+  checkIfMobile() {
+    if (typeof window !== 'undefined') this.isMobile = window.innerWidth <= 768;
+  }
+
   saveUrls() {
     store.default.set('urls', this.urls);
   }
+
   getUrls() {
     const urls = store.default.get('urls');
     if (urls === null) return;
     this.urls = urls;
   }
+
   randomNumber(): number {
     const urls_length = this.urls['yt'].length + this.urls['spot'].length - 2;
     return Math.floor(Math.random() * urls_length);
@@ -106,6 +122,7 @@ export class AppComponent {
   boxColor(player_name: number) {
     return player_name === 0 ? 'bg-red' : 'bg-green';
   }
+
   addQueue() {
     const rng_number = this.randomNumber();
     const yt_arr_len = this.urls['yt'].length - 1;
@@ -119,16 +136,19 @@ export class AppComponent {
       return;
     }
   }
+
   removeFromQueue(id: string) {
     this.queue = this.queue.filter((queue) => queue[2] !== id);
     this.addQueue();
   }
+
   makeQueue() {
     this.queue = [];
     for (let index = 0; index < 50; index++) {
       this.addQueue();
     }
   }
+
   updatePlaying(is_playing: boolean, player_type: number) {
     if (
       (this.playing[1] === 1 && player_type === 0) ||
@@ -183,6 +203,7 @@ export class AppComponent {
       }
     }
   }
+
   nextSong() {
     if (this.spotify_loading || this.youtube_loading || this.spotify_queue) {
       return;
@@ -197,7 +218,6 @@ export class AppComponent {
       this.ytService.stopPlayer();
     } else if (this.playing[1] === 1 && player_type === 0 && this.playing[0]) {
       this.spotifyWPComponent.pauseDevice();
-      // this.updatePlaying(false, 1);
     }
     this.updatePlaying(true, player_type);
     this.playing_song = song_name;
@@ -210,6 +230,7 @@ export class AppComponent {
     }
     this.addQueue();
   }
+
   prevSong() {
     const item = this.previous_songs.pop();
     if (item === undefined) return;
@@ -276,6 +297,7 @@ export class AppComponent {
       },
     });
   }
+
   clearInput(link: FormControl) {
     if (
       link.value ===
@@ -285,6 +307,29 @@ export class AppComponent {
     )
       link.setValue('');
   }
+
+  ngOnInit() {
+    this.startTimer();
+  }
+
+  startTimer() {
+    this.timer = setTimeout(() => {
+      this.mouseLeft();
+    }, 3000);
+  }
+
+  resetTimer() {
+    if (!this.isMobile) {
+      clearTimeout(this.timer);
+      this.showControllers = true;
+      this.startTimer();
+    }
+  }
+
+  mouseLeft() {
+    if (!this.isMobile) this.showControllers = false;
+  }
+
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.queue, event.previousIndex, event.currentIndex);
   }

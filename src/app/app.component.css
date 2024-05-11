@@ -1,24 +1,13 @@
 * {
   color: white;
 }
-/* .players {
-  gap: 20px;
-} */
-/* .red {
-  background-color: red;
-}
-.green {
-  background-color: green;
-} */
 .song::-webkit-scrollbar {
   display: none;
 }
 ::-webkit-scrollbar {
   width: 10px;
 }
-/* Track */
 ::-webkit-scrollbar-track {
-  /* box-shadow: inset 0 0 5px grey; */
   border-radius: 0px;
 }
 
@@ -39,18 +28,11 @@
 }
 body {
   background-color: #19282f;
-  /* height: 100vh; */
   background-size: cover;
 }
 .example-list {
   width: 60%;
-  /* max-width: 100%; */
-  /* border: solid 1px #ccc; */
-  /* height: 75vh; */
   display: block;
-  /* background: white; */
-  /* border-radius: 4px; */
-  /* overflow: hidden; */
 }
 
 .example-box {
@@ -63,7 +45,6 @@ body {
   justify-content: space-between;
   box-sizing: border-box;
   cursor: move;
-  /* background: white; */
   font-size: 14px;
 }
 
