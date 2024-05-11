@@ -172,108 +172,107 @@
     (mouseleave)="mouseLeft()"
   >
     <div
-      class="fixed justify-center rounded-t-full bottom-0 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600"
-      [ngClass]="showControllers ? 'w-1/2 h-10per' : ' w-1/6 h-8per'"
+      class="controller fixed justify-center items-center rounded-t-full bottom-0 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600"
+      [ngClass]="
+        showControllers
+          ? ' animate-showController w-1/2 h-10per'
+          : ' animate-hideController w-1/6 h-8per'
+      "
     >
       <div
-        class="bg-slate-50 rounded-t-full text-slate-500 dark:bg-slate-600 dark:text-slate-200 flex items-center h-full"
+        class="bg-slate-50 rounded-t-full text-slate-500 dark:bg-slate-600 dark:text-slate-200 flex items-center h-full justify-evenly"
       >
         <div
-          class="flex-auto flex items-center"
-          [ngClass]="showControllers ? 'justify-evenly' : 'justify-center'"
+          class="song overflow-y-hidden hidden"
+          [ngClass]="
+            showControllers
+              ? ' w-20 sm:block lg:hidden xl:block'
+              : ' w-40 sm:inline lg:hidden xl:inline'
+          "
         >
-          <div
-            class="song overflow-y-hidden hidden"
-            [ngClass]="
-              showControllers
-                ? ' w-20 sm:block lg:hidden xl:block'
-                : ' w-40 sm:inline lg:hidden xl:inline'
-            "
-          >
-            <div class="text-center">Playing:</div>
+          <div class="text-center">Playing:</div>
 
-            <div
-              class="song animate-marquee whitespace-nowrap w-100vw text-center"
-            >
-              {{ playing_song }}
-            </div>
+          <div
+            class="song animate-marquee whitespace-nowrap w-100vw text-center"
+          >
+            {{ playing_song }}
           </div>
-          <button
-            *ngIf="showControllers"
-            type="button"
-            class="sm:block lg:block xl:block"
-            aria-label="Previous"
-            (click)="prevSong()"
-          >
-            <svg width="24" height="24" fill="none">
-              <path
-                d="m10 12 8-6v12l-8-6Z"
-                fill="currentColor"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M6 6v12"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
         </div>
-        <button
-          *ngIf="showControllers"
-          type="button"
-          class="bg-white text-slate-900 dark:bg-slate-100 dark:text-slate-700 flex-none -my-2 mx-auto w-10 h-10 sm:w-20 sm:h-20 rounded-full ring-1 ring-slate-900/5 shadow-md flex items-center justify-center"
-          aria-label="Pause"
-          (click)="mainController()"
-        >
-          <svg width="30" height="32" fill="black" *ngIf="playing[0]">
-            <rect x="10" y="5" width="2" height="21" rx="2" />
-            <rect x="18" y="5" width="2" height="21" rx="2" />
-          </svg>
-          <svg
-            *ngIf="!playing[0]"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-            fill="black"
-          >
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </button>
         <div
-          class="flex-auto flex items-center justify-evenly"
-          *ngIf="showControllers"
+          class="controllers-container w-3/5"
+          [ngClass]="{ hidden: !showControllers }"
         >
-          <button
-            type="button"
-            class="sm:block lg:block xl:block"
-            aria-label="Next"
-            (click)="nextSong()"
-          >
-            <svg width="24" height="24" fill="none">
-              <path
-                d="M14 12 6 6v12l8-6Z"
-                fill="currentColor"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M18 6v12"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
+          <div class="flex-auto flex items-center justify-evenly">
+            <button
+              type="button"
+              class="sm:block lg:block xl:block"
+              aria-label="Previous"
+              (click)="prevSong()"
+            >
+              <svg width="24" height="24" fill="none">
+                <path
+                  d="m10 12 8-6v12l-8-6Z"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M6 6v12"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="bg-white text-slate-900 dark:bg-slate-100 dark:text-slate-700 flex-none -my-2 mx-auto w-10 h-10 sm:w-20 sm:h-20 rounded-full ring-1 ring-slate-900/5 shadow-md flex items-center justify-center"
+              aria-label="Pause"
+              (click)="mainController()"
+            >
+              <svg width="30" height="32" fill="black" *ngIf="playing[0]">
+                <rect x="10" y="5" width="2" height="21" rx="2" />
+                <rect x="18" y="5" width="2" height="21" rx="2" />
+              </svg>
+              <svg
+                *ngIf="!playing[0]"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="black"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="sm:block lg:block xl:block"
+              aria-label="Next"
+              (click)="nextSong()"
+            >
+              <svg width="24" height="24" fill="none">
+                <path
+                  d="M14 12 6 6v12l8-6Z"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M18 6v12"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

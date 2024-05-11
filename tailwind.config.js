@@ -9,6 +9,10 @@ module.exports = {
         marquee2: "marquee2 10s linear infinite",
         fadeIn: "fadeIn 2s ease-in-out",
         fadeOut: "fadeOut 2s ease-in-out ",
+        showController: "showController 1s ease-in-out",
+        hideController: "hideController 1s ease-in-out ",
+        showButton: "showButton 1s ease-in-out",
+        hideButton: "hideButton 1s ease-in-out ",
       },
       keyframes: {
         marquee: {
@@ -27,6 +31,22 @@ module.exports = {
           "0%": { height: "50px" },
           "100%": { height: "30vh" },
         },
+        hideController: {
+          "0%": { width: "50%" },
+          "100%": { width: "16.666667%" },
+        },
+        showController: {
+          "0%": { width: "16.666667%" },
+          "100%": { width: "50%" },
+        },
+        hideButton: {
+          "0%": { visibility: "visible" },
+          "100%": { visibility: "hidden" },
+        },
+        showButton: {
+          "0%": { visibility: "hidden" },
+          "100%": { visibility: "show" },
+        },
       },
       height: {
         "10per": "10%",
@@ -37,7 +57,6 @@ module.exports = {
       },
       width: {
         "3/5": "60%",
-        "1/2": "50vw",
         "30vw": "30vw",
         "20%": "20%",
         "10%": "10%",
