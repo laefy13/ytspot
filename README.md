@@ -6,6 +6,13 @@ Deployed here -> https://lemon-grass-0b1c6b800.5.azurestaticapps.net/
 ## Features:
    * Put a public spotify and youtube playlist and a queue will be made, automatically shuffled. 
    * API sever is this -> [ytspotServer](https://github.com/laefy13/ytspotServer)
+## Added Features
+   * 5/11/24
+      * Volume sliders
+      * Auto hide controller
+      * Auto clear of the link inputs
+      * "Styled" the spotify login/logout buttons
+      * Animation for the auto hide controller
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.2.
 
