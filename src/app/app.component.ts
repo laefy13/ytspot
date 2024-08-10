@@ -27,6 +27,7 @@ interface UrlsObject {
   yt: [string, string, string][];
   spot: [string, string, string][];
 }
+import { v4 as uuidv4 } from 'uuid';
 providers: [provideHttpClient(withFetch())];
 @Component({
   selector: 'app-root',
@@ -65,7 +66,7 @@ export class AppComponent {
   youtube_message = '';
   playing = [false, 0];
   urls: UrlsObject = { yt: [], spot: [] };
-  queue: [number, string, string, string][] = [];
+  queue: [number, string, string, string, string][] = [];
   player_state = 0;
   playing_song: string = '';
   update_class = true;
@@ -74,7 +75,7 @@ export class AppComponent {
   spotify_loading = false;
   spotify_queue = false;
   youtube_loading = false;
-  previous_songs: [number, string, string, string][] = [];
+  previous_songs: [number, string, string, string, string][] = [];
   api_link = environment.API_URL;
   isMobile: boolean = false;
   showControllers: boolean = true;
@@ -126,11 +127,16 @@ export class AppComponent {
   addQueue() {
     const rng_number = this.randomNumber();
     const yt_arr_len = this.urls['yt'].length - 1;
+    const song_uuid: string = uuidv4();
     try {
       if (rng_number < yt_arr_len) {
-        this.queue.push([0, ...this.urls['yt'][rng_number]]);
+        this.queue.push([0, ...this.urls['yt'][rng_number], song_uuid]);
       } else {
-        this.queue.push([1, ...this.urls['spot'][rng_number - yt_arr_len]]);
+        this.queue.push([
+          1,
+          ...this.urls['spot'][rng_number - yt_arr_len],
+          song_uuid,
+        ]);
       }
     } catch {
       return;
@@ -138,8 +144,20 @@ export class AppComponent {
   }
 
   removeFromQueue(id: string) {
-    this.queue = this.queue.filter((queue) => queue[2] !== id);
+    this.queue = this.queue.filter((queue) => queue[4] !== id);
     this.addQueue();
+  }
+
+  immediatePlay(id: string) {
+    const startIndex = this.queue.findIndex((queue) => queue[4] === id);
+    console.log(startIndex);
+    if (startIndex === -1) {
+      return;
+    }
+    this.previous_songs.push(...this.queue.slice(0, startIndex));
+    this.queue = this.queue.slice(startIndex);
+    for (let i = 0; i < startIndex; i++) this.addQueue();
+    this.nextSong();
   }
 
   makeQueue() {
@@ -210,7 +228,7 @@ export class AppComponent {
     }
     const item = this.queue.shift();
     if (item === undefined) return;
-    let [player_type, song_name, song_id, img_url] = item;
+    let [player_type, song_name, song_id, img_url, song_uuid] = item;
     this.previous_songs.push(item);
 
     if (this.playing[1] === 0 && player_type === 1 && this.playing[0]) {
@@ -234,7 +252,7 @@ export class AppComponent {
   prevSong() {
     const item = this.previous_songs.pop();
     if (item === undefined) return;
-    let [player_type, song_name, song_id, img_url] = item;
+    let [player_type, song_name, song_id, img_url, song_uuid] = item;
     this.queue.unshift(item);
     this.player_state = -1;
     this.playing = [false, 0];
@@ -243,6 +261,29 @@ export class AppComponent {
     } else {
       this.spotifyWPComponent.pauseDevice();
       this.updatePlaying(false, 1);
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    const isInputActive =
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable;
+
+    if (!isInputActive) {
+      console.log(event.code);
+      if (event.code === 'Space') {
+        event.preventDefault();
+        this.mainController();
+      } else if (event.code === 'ArrowRight') {
+        event.preventDefault();
+        this.nextSong();
+      } else if (event.code === 'ArrowLeft') {
+        event.preventDefault();
+        this.prevSong();
+      }
     }
   }
 
@@ -322,7 +363,6 @@ export class AppComponent {
     if (!this.isMobile) {
       clearTimeout(this.timer);
       this.showControllers = true;
-      this.startTimer();
     }
   }
 

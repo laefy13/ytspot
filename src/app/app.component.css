@@ -31,12 +31,12 @@ body {
   background-size: cover;
 }
 .example-list {
-  width: 60%;
+  width: 75%;
   display: block;
 }
 
 .example-box {
-  padding: 20px 10px;
+  padding: 20px 5px 20px 10px;
   border-bottom: solid 1px #ccc;
   color: #19282f;
   display: flex;
@@ -46,6 +46,30 @@ body {
   box-sizing: border-box;
   cursor: move;
   font-size: 14px;
+  .song-name {
+    width: 80%;
+    color: black;
+    height: 20%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .song-buttons {
+    width: 15%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+}
+
+.github-project {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  opacity: 1;
+  margin: 15px 15px;
 }
 
 .cdk-drag-preview {
@@ -69,4 +93,10 @@ body {
 
 .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media screen and (min-width: 640px) {
+  .example-list {
+    width: 90%;
+  }
 }
