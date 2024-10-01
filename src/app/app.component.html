@@ -6,8 +6,109 @@
   >
     <img src="/assets/github-mark-white.png" />
   </a>
+  <button
+    class="search-button"
+    (click)="show_search_container = !show_search_container"
+  >
+    <svg
+      class="w-6 h-6 text-gray-800 dark:text-white"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2"
+        d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+      />
+    </svg>
+  </button>
+  <div
+    class="search-container flex items-center justify-center mt-10 flex-col"
+    [ngClass]="{
+      'animate-showSearchContainer  show-search-container ':
+        !isMobile && show_search_container,
+      'animate-hideSearchContainer hide-search-container':
+        !isMobile && !show_search_container,
+        'animate-mobileHideSearchContainer mobile-hide-search-container' : isMobile && !show_search_container,
+        'animate-mobileShowSearchContainer' : isMobile && show_search_container,
+      'shadow-md': spotify_loading || youtube_loading,
+      'w-20vw':!isMobile,
+      'w-100vw':isMobile,
+    }"
+  >
+    <input type="text" [formControl]="search_name" />
+    <button (click)="search()" [disabled]="spotify_loading || youtube_loading">
+      search
+    </button>
+
+    <span> {{ search_added_status }} </span>
+
+    <div class="flex flex-col h-4/5 items-center p-5 w-full relative">
+      <div
+        class="example-list min-w-1/2 w-fit overflow-y-auto w-1/2 border border-lightgreen h-full bg-transparent relative items-center"
+        cdkScrollable
+      >
+        <div *ngIf="search_results.length < 1" class="p-5">No songs found</div>
+        <div *ngIf="search_results.length >= 1">
+          <div
+            *ngFor="let song of search_results; trackBy: trackSong"
+            class="example-box"
+            [ngClass]="boxColor(song[0])"
+            [id]="song[1]"
+          >
+            <div class="song-name">
+              {{ song[2] }}
+            </div>
+
+            <div class="song-buttons">
+              <button (click)="addSongToQueue(song)">
+                <svg
+                  class="w-6 h-6 text-gray-800 dark:text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 12h14m-7 7V5"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-loading
+        [is_loading]="spotify_loading || youtube_loading"
+        [additional_text]="'Getting data & making new queue'"
+      />
+    </div>
+  </div>
+
   <div class="flex h-screen sm:flex-row flex-col mb-30 sm:mb-0">
     <div class="flex flex-col md:w-1/2 p-10 w-full">
+      <div class="get-time flex flex-row justify-center items-center">
+        <input type="checkbox" [(ngModel)]="getTime" class="sr-only peer" />
+        <div
+          class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+          (click)="getTime = flipBool(getTime)"
+        ></div>
+        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+          >time</span
+        >
+      </div>
       <div class="spotify w-full flex flex-col">
         <div class="flex flex-col">
           <label
@@ -33,10 +134,26 @@
 
               <app-loading [is_loading]="spotify_loading" />
             </div>
+            <div class="spotify-cache">
+              <input
+                type="checkbox"
+                [(ngModel)]="spotifyCached"
+                class="sr-only peer"
+              />
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                (click)="spotifyCached = flipBool(spotifyCached)"
+              ></div>
+              <span
+                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >cache</span
+              >
+            </div>
             <button
               type="button"
               class="w-3/12 focus:outline-none text-white bg-green hover:bg-green focus:ring-4 focus:ring-green font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green dark:hover:bg-green dark:focus:ring-green"
               (click)="getDataFromApi(false)"
+              [disabled]="spotify_loading"
             >
               Add Playlist
             </button>
@@ -76,10 +193,27 @@
               />
               <app-loading [is_loading]="youtube_loading" />
             </div>
+
+            <div class="youtube-cache">
+              <input
+                type="checkbox"
+                [(ngModel)]="youtubeCached"
+                class="sr-only peer"
+              />
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                (click)="youtubeCached = flipBool(youtubeCached)"
+              ></div>
+              <span
+                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >cache</span
+              >
+            </div>
             <button
               type="button"
               class="w-3/12 focus:outline-none text-white bg-red hover:bg-red focus:ring-4 focus:ring-red font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-red dark:hover:bg-red dark:focus:ring-red"
               (click)="getDataFromApi(true)"
+              [disabled]="youtube_loading"
             >
               Add playlist
             </button>
@@ -145,11 +279,11 @@
           <div
             class="example-box"
             [ngClass]="boxColor(song[0])"
-            [id]="song[2]"
+            [id]="song[3]"
             cdkDrag
           >
             <div class="song-name">
-              {{ song[1] }}
+              {{ song[2] }}
             </div>
             <div class="song-buttons">
               <button (click)="immediatePlay(song[4])">
@@ -177,6 +311,9 @@
                   ></path>
                 </svg>
               </button>
+            </div>
+            <div class="time" *ngIf="getTime">
+              {{ song[3] }}
             </div>
           </div>
           }}

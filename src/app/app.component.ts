@@ -20,14 +20,17 @@ import {
 } from '@angular/cdk/drag-drop';
 import { YoutubeWebPlaybackComponent } from './youtube-web-playback/youtube-web-playback.component';
 import { LoadingComponent } from './loading/loading.component';
-
 import * as store from 'store2';
 import { environment } from '../environments/environment';
+import { v4 as uuidv4 } from 'uuid';
+
 interface UrlsObject {
   yt: [string, string, string][];
   spot: [string, string, string][];
 }
-import { v4 as uuidv4 } from 'uuid';
+type QueueTuple = [number, string, string, string, string];
+type SearchTuple = [number, string, string, string];
+
 providers: [provideHttpClient(withFetch())];
 @Component({
   selector: 'app-root',
@@ -64,9 +67,12 @@ export class AppComponent {
   );
   spotify_message = '';
   youtube_message = '';
+  spotifyCached: boolean = false;
+  youtubeCached: boolean = false;
+  getTime: boolean = false;
   playing = [false, 0];
   urls: UrlsObject = { yt: [], spot: [] };
-  queue: [number, string, string, string, string][] = [];
+  queue: QueueTuple[] = [];
   player_state = 0;
   playing_song: string = '';
   update_class = true;
@@ -75,11 +81,15 @@ export class AppComponent {
   spotify_loading = false;
   spotify_queue = false;
   youtube_loading = false;
-  previous_songs: [number, string, string, string, string][] = [];
+  previous_songs: QueueTuple[] = [];
   api_link = environment.API_URL;
   isMobile: boolean = false;
   showControllers: boolean = true;
   timer: any;
+  search_results: SearchTuple[] = [];
+  search_name = new FormControl('');
+  show_search_container = false;
+  search_added_status = '...';
 
   constructor(
     private http: HttpClient,
@@ -124,6 +134,15 @@ export class AppComponent {
     return player_name === 0 ? 'bg-red' : 'bg-green';
   }
 
+  addSongToQueue(song_item: SearchTuple) {
+    this.queue.unshift([...song_item, uuidv4()]);
+    this.search_added_status = `${song_item[2]} added to Queue`;
+
+    setTimeout(() => {
+      this.search_added_status = '...';
+    }, 3000);
+  }
+
   addQueue() {
     const rng_number = this.randomNumber();
     const yt_arr_len = this.urls['yt'].length - 1;
@@ -144,19 +163,19 @@ export class AppComponent {
   }
 
   removeFromQueue(id: string) {
-    this.queue = this.queue.filter((queue) => queue[4] !== id);
-    this.addQueue();
+    this.queue = this.queue.filter((queue) => queue[3] !== id);
+    if (this.queue.length < 50) this.addQueue();
   }
 
   immediatePlay(id: string) {
-    const startIndex = this.queue.findIndex((queue) => queue[4] === id);
-    console.log(startIndex);
+    const startIndex = this.queue.findIndex((queue) => queue[3] === id);
     if (startIndex === -1) {
       return;
     }
     this.previous_songs.push(...this.queue.slice(0, startIndex));
     this.queue = this.queue.slice(startIndex);
-    for (let i = 0; i < startIndex; i++) this.addQueue();
+    if (this.queue.length < 50)
+      for (let i = 0; i < startIndex; i++) this.addQueue();
     this.nextSong();
   }
 
@@ -228,7 +247,7 @@ export class AppComponent {
     }
     const item = this.queue.shift();
     if (item === undefined) return;
-    let [player_type, song_name, song_id, img_url, song_uuid] = item;
+    let [player_type, song_name, song_id, song_uuid] = item;
     this.previous_songs.push(item);
 
     if (this.playing[1] === 0 && player_type === 1 && this.playing[0]) {
@@ -242,17 +261,16 @@ export class AppComponent {
     if (player_type === 0) {
       this.youtubeWPComponent.playOne(song_id);
     } else {
-      this.img_url = img_url;
       this.spotify_queue = true;
       this.spotify_queue = this.spotifyWPComponent.playOne(song_id);
     }
-    this.addQueue();
+    if (this.queue.length < 50) this.addQueue();
   }
 
   prevSong() {
     const item = this.previous_songs.pop();
     if (item === undefined) return;
-    let [player_type, song_name, song_id, img_url, song_uuid] = item;
+    let [player_type, song_name, song_id, song_uuid] = item;
     this.queue.unshift(item);
     this.player_state = -1;
     this.playing = [false, 0];
@@ -273,7 +291,6 @@ export class AppComponent {
       target.isContentEditable;
 
     if (!isInputActive) {
-      console.log(event.code);
       if (event.code === 'Space') {
         event.preventDefault();
         this.mainController();
@@ -292,13 +309,13 @@ export class AppComponent {
     if (source) {
       link =
         this.api_link +
-          'youtube?images=1&yt_playlist=' +
+          `youtube?is_cache=${this.youtubeCached}&get_time=${this.getTime}&yt_playlist=` +
           this.youtube_link.value || '';
       this.youtube_loading = true;
     } else {
       link =
         this.api_link +
-          'spotify?images=1&spotify_playlist=' +
+          `spotify?is_cache=${this.spotifyCached}&get_time=${this.getTime}&spotify_playlist=` +
           this.spotify_link.value || '';
       this.spotify_loading = true;
     }
@@ -307,21 +324,13 @@ export class AppComponent {
       next: (response) => {
         if (source) {
           this.urls.yt = Object.entries<string[]>(response.urls).map(
-            ([title, link_image]: [string, string[]]) => [
-              title,
-              link_image[0],
-              link_image[1],
-            ]
+            ([id, item]: [string, string[]]) => [id, item[0], item[1]]
           );
           this.youtube_message = 'Successfully added playlist';
           this.youtube_loading = false;
         } else {
           this.urls.spot = Object.entries<string[]>(response.urls).map(
-            ([title, link_image]: [string, string[]]) => [
-              title,
-              link_image[0],
-              link_image[1],
-            ]
+            ([id, item]: [string, string[]]) => [id, item[0], item[1]]
           );
           this.spotify_message = 'Successfully added playlist';
           this.spotify_loading = false;
@@ -372,5 +381,29 @@ export class AppComponent {
 
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.queue, event.previousIndex, event.currentIndex);
+  }
+
+  search() {
+    this.search_results = [];
+    const search_name_value = this.search_name.value
+      ? this.search_name.value.toLowerCase()
+      : '';
+    if (search_name_value == '') return;
+
+    this.urls.spot.map(([id, name, time]) => {
+      if (name.toLowerCase().includes(search_name_value))
+        this.search_results.push([1, id, name, time]);
+    });
+    this.urls.yt.map(([id, name, time]) => {
+      if (name.toLowerCase().includes(search_name_value))
+        this.search_results.push([0, id, name, time]);
+    });
+  }
+  trackSong(index: number, song: SearchTuple) {
+    return song[0];
+  }
+
+  flipBool(variable_: boolean): boolean {
+    return !variable_;
   }
 }

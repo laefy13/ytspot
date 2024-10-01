@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { YtserviceService } from '../services/ytservice.service';
 import { FormsModule } from '@angular/forms';
+import * as store from 'store2';
 
 @Component({
   selector: 'app-youtube-web-playback',
@@ -39,11 +40,14 @@ export class YoutubeWebPlaybackComponent {
   }
   updateVolume() {
     this.player.setVolume(this.youtube_volume);
+    store.default.set('yt-volume', this.youtube_volume);
   }
   ngOnInit(): void {
     this.ytService.loadPlayer().subscribe(
       (player: any) => {
         this.player = player;
+        const temp_vol = store.default.get('yt-volume');
+        this.youtube_volume = temp_vol ? temp_vol : this.youtube_volume;
         this.player.setVolume(this.youtube_volume);
       },
       () => {

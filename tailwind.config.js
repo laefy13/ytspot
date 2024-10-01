@@ -16,6 +16,10 @@ module.exports = {
         hideController: "hideController 1s ease-in-out ",
         showButton: "showButton 1s ease-in-out",
         hideButton: "hideButton 1s ease-in-out ",
+        showSearchContainer: "showSearchContainer .3s ease-in-out",
+        hideSearchContainer: "hideSearchContainer .3s ease-in-out",
+        mobileShowSearchContainer: "mobileShowSearchContainer .3s ease-in-out",
+        mobileHideSearchContainer: "mobileHideSearchContainer .3s ease-in-out",
       },
       keyframes: {
         marquee: {
@@ -50,6 +54,22 @@ module.exports = {
           "0%": { visibility: "hidden" },
           "100%": { visibility: "show" },
         },
+        hideSearchContainer: {
+          "0%": { transform: "translateX(0vw)" },
+          "100%": { transform: "translateX(-21vw)" },
+        },
+        showSearchContainer: {
+          "0%": { transform: "translateX(-20vw)" },
+          "100%": { transform: "translateX(0vw)" },
+        },
+        mobileHideSearchContainer: {
+          "0%": { transform: "translateX(0vw)" },
+          "100%": { transform: "translateX(-100vw)" },
+        },
+        mobileShowSearchContainer: {
+          "0%": { transform: "translateX(-100vw)" },
+          "100%": { transform: "translateX(0vw)" },
+        },
       },
       height: {
         "10per": "10%",
@@ -63,6 +83,8 @@ module.exports = {
         "30vw": "30vw",
         "20%": "20%",
         "10%": "10%",
+        "20vw": "20vw",
+        "100vw": "100vw",
       },
       colors: {
         darkgreen: "#19282F",
