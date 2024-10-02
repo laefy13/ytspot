@@ -72,15 +72,18 @@ body {
   margin: 15px 15px;
 }
 
-.search-button {
+.floating-buttons {
   width: 40px;
   height: 40px;
   position: fixed;
   left: 0;
   top: 0;
   opacity: 1;
-  margin: 15px 15px;
+  margin: 5px 15px;
   z-index: 1000;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
 }
 
 .cdk-drag-preview {
@@ -154,6 +157,19 @@ body {
       align-items: flex-end;
     }
   }
+}
+
+.hide-settings-container {
+  transform: translateX(101vw);
+}
+.settings-container {
+  position: fixed;
+  width: 100%;
+  height: 10vh;
+  background-color: #ff6600;
+  z-index: 999;
+  margin-top: 0;
+  gap: 2rem;
 }
 
 @media screen and (max-width: 768px) {

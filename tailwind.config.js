@@ -20,6 +20,12 @@ module.exports = {
         hideSearchContainer: "hideSearchContainer .3s ease-in-out",
         mobileShowSearchContainer: "mobileShowSearchContainer .3s ease-in-out",
         mobileHideSearchContainer: "mobileHideSearchContainer .3s ease-in-out",
+        showSettingsContainer: "showSettingsContainer .3s ease-in-out",
+        hideSettingsContainer: "hideSettingsContainer .3s ease-in-out",
+        mobileShowSettingsContainer:
+          "mobileShowSettingsContainer .3s ease-in-out",
+        mobileHideSettingsContainer:
+          "mobileHideSearchContainer .3s ease-in-out",
       },
       keyframes: {
         marquee: {
@@ -68,6 +74,14 @@ module.exports = {
         },
         mobileShowSearchContainer: {
           "0%": { transform: "translateX(-100vw)" },
+          "100%": { transform: "translateX(0vw)" },
+        },
+        hideSettingsContainer: {
+          "0%": { transform: "translateX(0vw)" },
+          "100%": { transform: "translateX(100vw)" },
+        },
+        showSettingsContainer: {
+          "0%": { transform: "translateX(100vw)" },
           "100%": { transform: "translateX(0vw)" },
         },
       },

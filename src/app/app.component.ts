@@ -67,9 +67,15 @@ export class AppComponent {
   );
   spotify_message = '';
   youtube_message = '';
-  spotifyCached: boolean = false;
-  youtubeCached: boolean = false;
-  getTime: boolean = false;
+  spotifyCached: boolean = store.default.get('spotifyCached')
+    ? store.default.get('spotifyCached')
+    : false;
+  youtubeCached: boolean = store.default.get('youtubeCached')
+    ? store.default.get('youtubeCached')
+    : false;
+  getTime: boolean = store.default.get('getTime')
+    ? store.default.get('getTime')
+    : false;
   playing = [false, 0];
   urls: UrlsObject = { yt: [], spot: [] };
   queue: QueueTuple[] = [];
@@ -90,6 +96,7 @@ export class AppComponent {
   search_name = new FormControl('');
   show_search_container = false;
   search_added_status = '...';
+  show_settings_container = false;
 
   constructor(
     private http: HttpClient,
@@ -163,16 +170,17 @@ export class AppComponent {
   }
 
   removeFromQueue(id: string) {
-    this.queue = this.queue.filter((queue) => queue[3] !== id);
+    this.queue = this.queue.filter((queue) => queue[4] !== id);
     if (this.queue.length < 50) this.addQueue();
   }
 
   immediatePlay(id: string) {
-    const startIndex = this.queue.findIndex((queue) => queue[3] === id);
+    const startIndex = this.queue.findIndex((queue) => queue[4] === id);
     if (startIndex === -1) {
       return;
     }
     this.previous_songs.push(...this.queue.slice(0, startIndex));
+    console.log(this.previous_songs);
     this.queue = this.queue.slice(startIndex);
     if (this.queue.length < 50)
       for (let i = 0; i < startIndex; i++) this.addQueue();
@@ -247,7 +255,7 @@ export class AppComponent {
     }
     const item = this.queue.shift();
     if (item === undefined) return;
-    let [player_type, song_name, song_id, song_uuid] = item;
+    let [player_type, song_id, song_name, time, song_uuid] = item;
     this.previous_songs.push(item);
 
     if (this.playing[1] === 0 && player_type === 1 && this.playing[0]) {
@@ -258,6 +266,8 @@ export class AppComponent {
     }
     this.updatePlaying(true, player_type);
     this.playing_song = song_name;
+    console.log(song_id);
+    console.log(item);
     if (player_type === 0) {
       this.youtubeWPComponent.playOne(song_id);
     } else {
@@ -403,7 +413,9 @@ export class AppComponent {
     return song[0];
   }
 
-  flipBool(variable_: boolean): boolean {
-    return !variable_;
+  flipBool(name: string, variable_: boolean): boolean {
+    variable_ = !variable_;
+    store.default.set(name, variable_);
+    return variable_;
   }
 }
