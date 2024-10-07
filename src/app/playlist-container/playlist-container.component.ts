@@ -57,11 +57,7 @@ export class PlaylistContainerComponent {
     const playlists = store.default.get('playlists');
     if (playlists === null) return;
     Object.entries(playlists).forEach(([key, item]) => {
-      const [playlist_num, inherited_link, playlist_type] = item as [
-        number,
-        string,
-        boolean
-      ];
+      const [inherited_link, playlist_type] = item as [string, boolean];
       this.inherited_link = inherited_link;
       this.playlist_type = playlist_type;
       this.component_id = key;
