@@ -21,7 +21,7 @@ import {
 import { YoutubeWebPlaybackComponent } from './youtube-web-playback/youtube-web-playback.component';
 import { LoadingComponent } from './loading/loading.component';
 import * as store from 'store2';
-import { environment } from '../environments/environment';
+import { environment } from '../environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
 import { PlaylistComponent } from './playlist/playlist.component';
 import { PlaylistContainerComponent } from './playlist-container/playlist-container.component';
