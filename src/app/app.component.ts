@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ViewContainerRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {
   HttpClient,
@@ -20,15 +20,13 @@ import {
 } from '@angular/cdk/drag-drop';
 import { YoutubeWebPlaybackComponent } from './youtube-web-playback/youtube-web-playback.component';
 import { LoadingComponent } from './loading/loading.component';
-
 import * as store from 'store2';
 import { environment } from '../environments/environment';
-interface UrlsObject {
-  yt: [string, string, string][];
-  spot: [string, string, string][];
-}
 import { v4 as uuidv4 } from 'uuid';
-providers: [provideHttpClient(withFetch())];
+import { PlaylistComponent } from './playlist/playlist.component';
+import { PlaylistContainerComponent } from './playlist-container/playlist-container.component';
+import { UrlsObject, QueueTuple, SearchTuple } from './models/types';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -44,6 +42,8 @@ providers: [provideHttpClient(withFetch())];
     FormsModule,
     LoadingComponent,
     YoutubeWebPlaybackComponent,
+    PlaylistComponent,
+    PlaylistContainerComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
@@ -54,7 +54,6 @@ export class AppComponent {
   spotifyWPComponent!: SpotifyWebPlaybackComponent;
   @ViewChild(YoutubeWebPlaybackComponent)
   youtubeWPComponent!: YoutubeWebPlaybackComponent;
-
   title = 'ytspot';
   youtube_link = new FormControl(
     'https://youtube.com/playlist?list=PL4xFhy5pDwEiI2FWxPOBpdwiY-Ju5uIZW&si=Amms7BzTLGVt5Reo'
@@ -64,9 +63,18 @@ export class AppComponent {
   );
   spotify_message = '';
   youtube_message = '';
+  spotifyCached: boolean = store.default.get('spotifyCached')
+    ? store.default.get('spotifyCached')
+    : false;
+  youtubeCached: boolean = store.default.get('youtubeCached')
+    ? store.default.get('youtubeCached')
+    : false;
+  getTime: boolean = store.default.get('getTime')
+    ? store.default.get('getTime')
+    : false;
   playing = [false, 0];
   urls: UrlsObject = { yt: [], spot: [] };
-  queue: [number, string, string, string, string][] = [];
+  queue: QueueTuple[] = [];
   player_state = 0;
   playing_song: string = '';
   update_class = true;
@@ -75,14 +83,20 @@ export class AppComponent {
   spotify_loading = false;
   spotify_queue = false;
   youtube_loading = false;
-  previous_songs: [number, string, string, string, string][] = [];
+  previous_songs: QueueTuple[] = [];
   api_link = environment.API_URL;
   isMobile: boolean = false;
   showControllers: boolean = true;
   timer: any;
+  search_results: SearchTuple[] = [];
+  search_name = new FormControl('');
+  show_search_container = false;
+  search_added_status = '...';
+  show_settings_container = false;
+  dropdownPopoverShow = false;
+  loading_num = 0;
 
   constructor(
-    private http: HttpClient,
     private spotifyService: SpotifyService,
     private ytService: YtserviceService
   ) {
@@ -116,7 +130,7 @@ export class AppComponent {
   }
 
   randomNumber(): number {
-    const urls_length = this.urls['yt'].length + this.urls['spot'].length - 2;
+    const urls_length = this.urls.yt.length + this.urls.spot.length - 2;
     return Math.floor(Math.random() * urls_length);
   }
 
@@ -124,17 +138,26 @@ export class AppComponent {
     return player_name === 0 ? 'bg-red' : 'bg-green';
   }
 
+  addSongToQueue(song_item: SearchTuple) {
+    this.queue.unshift([...song_item, uuidv4()]);
+    this.search_added_status = `${song_item[2]} added to Queue`;
+
+    setTimeout(() => {
+      this.search_added_status = '...';
+    }, 3000);
+  }
+
   addQueue() {
     const rng_number = this.randomNumber();
-    const yt_arr_len = this.urls['yt'].length - 1;
+    const yt_arr_len = this.urls.yt.length - 1;
     const song_uuid: string = uuidv4();
     try {
       if (rng_number < yt_arr_len) {
-        this.queue.push([0, ...this.urls['yt'][rng_number], song_uuid]);
+        this.queue.push([0, ...this.urls.yt[rng_number], song_uuid]);
       } else {
         this.queue.push([
           1,
-          ...this.urls['spot'][rng_number - yt_arr_len],
+          ...this.urls.spot[rng_number - yt_arr_len],
           song_uuid,
         ]);
       }
@@ -144,19 +167,19 @@ export class AppComponent {
   }
 
   removeFromQueue(id: string) {
-    this.queue = this.queue.filter((queue) => queue[4] !== id);
-    this.addQueue();
+    this.queue = this.queue.filter((queue) => queue[5] !== id);
+    if (this.queue.length < 50) this.addQueue();
   }
 
   immediatePlay(id: string) {
-    const startIndex = this.queue.findIndex((queue) => queue[4] === id);
-    console.log(startIndex);
+    const startIndex = this.queue.findIndex((queue) => queue[5] === id);
     if (startIndex === -1) {
       return;
     }
     this.previous_songs.push(...this.queue.slice(0, startIndex));
     this.queue = this.queue.slice(startIndex);
-    for (let i = 0; i < startIndex; i++) this.addQueue();
+    if (this.queue.length < 50)
+      for (let i = 0; i < startIndex; i++) this.addQueue();
     this.nextSong();
   }
 
@@ -179,6 +202,7 @@ export class AppComponent {
       );
     }
     this.playing = [is_playing, player_type];
+    this.player_state = 1;
   }
 
   mainController() {
@@ -205,7 +229,6 @@ export class AppComponent {
     } else {
       if (this.player_state === 0 || this.player_state === -1) {
         this.nextSong();
-        this.player_state = 1;
       } else if (this.player_state === 1) {
         switch (this.playing[1]) {
           case 0:
@@ -228,7 +251,7 @@ export class AppComponent {
     }
     const item = this.queue.shift();
     if (item === undefined) return;
-    let [player_type, song_name, song_id, img_url, song_uuid] = item;
+    let [player_type, song_id, song_name, img_url] = item;
     this.previous_songs.push(item);
 
     if (this.playing[1] === 0 && player_type === 1 && this.playing[0]) {
@@ -242,17 +265,21 @@ export class AppComponent {
     if (player_type === 0) {
       this.youtubeWPComponent.playOne(song_id);
     } else {
-      this.img_url = img_url;
       this.spotify_queue = true;
       this.spotify_queue = this.spotifyWPComponent.playOne(song_id);
+      if (this.spotify_queue === true) {
+        this.queue.unshift(item);
+        return;
+      }
+      this.img_url = img_url;
     }
-    this.addQueue();
+    if (this.queue.length < 50) this.addQueue();
   }
 
   prevSong() {
     const item = this.previous_songs.pop();
     if (item === undefined) return;
-    let [player_type, song_name, song_id, img_url, song_uuid] = item;
+    let [player_type, song_name, song_id, song_uuid] = item;
     this.queue.unshift(item);
     this.player_state = -1;
     this.playing = [false, 0];
@@ -273,7 +300,6 @@ export class AppComponent {
       target.isContentEditable;
 
     if (!isInputActive) {
-      console.log(event.code);
       if (event.code === 'Space') {
         event.preventDefault();
         this.mainController();
@@ -285,68 +311,6 @@ export class AppComponent {
         this.prevSong();
       }
     }
-  }
-
-  getDataFromApi(source: boolean) {
-    let link: string;
-    if (source) {
-      link =
-        this.api_link +
-          'youtube?images=1&yt_playlist=' +
-          this.youtube_link.value || '';
-      this.youtube_loading = true;
-    } else {
-      link =
-        this.api_link +
-          'spotify?images=1&spotify_playlist=' +
-          this.spotify_link.value || '';
-      this.spotify_loading = true;
-    }
-
-    this.http.get<any>(link).subscribe({
-      next: (response) => {
-        if (source) {
-          this.urls.yt = Object.entries<string[]>(response.urls).map(
-            ([title, link_image]: [string, string[]]) => [
-              title,
-              link_image[0],
-              link_image[1],
-            ]
-          );
-          this.youtube_message = 'Successfully added playlist';
-          this.youtube_loading = false;
-        } else {
-          this.urls.spot = Object.entries<string[]>(response.urls).map(
-            ([title, link_image]: [string, string[]]) => [
-              title,
-              link_image[0],
-              link_image[1],
-            ]
-          );
-          this.spotify_message = 'Successfully added playlist';
-          this.spotify_loading = false;
-        }
-
-        this.makeQueue();
-      },
-      error: (error) => {
-        if (source) {
-          this.youtube_message = 'Problem with playlist';
-        } else {
-          this.spotify_message = 'Problem with playlist';
-        }
-      },
-    });
-  }
-
-  clearInput(link: FormControl) {
-    if (
-      link.value ===
-        'https://open.spotify.com/playlist/1gKIYxGVZBUpkmqamRa60w?si=655b6326c62f4a51' ||
-      link.value ===
-        'https://youtube.com/playlist?list=PL4xFhy5pDwEiI2FWxPOBpdwiY-Ju5uIZW&si=Amms7BzTLGVt5Reo'
-    )
-      link.setValue('');
   }
 
   ngOnInit() {
@@ -372,5 +336,40 @@ export class AppComponent {
 
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.queue, event.previousIndex, event.currentIndex);
+  }
+
+  search() {
+    this.search_results = [];
+    const search_name_value = this.search_name.value
+      ? this.search_name.value.toLowerCase()
+      : '';
+    if (search_name_value == '') return;
+    this.urls.spot.forEach(([id, name, img, time]) => {
+      if (name.toLowerCase().includes(search_name_value))
+        this.search_results.push([1, id, name, img, time]);
+    });
+    this.urls.yt.forEach(([id, name, img, time]) => {
+      if (name.toLowerCase().includes(search_name_value))
+        this.search_results.push([0, id, name, img, time]);
+    });
+  }
+
+  trackSong(index: number, song: SearchTuple) {
+    return song[0];
+  }
+
+  flipBool(name: string, variable_: boolean): boolean {
+    variable_ = !variable_;
+    store.default.set(name, variable_);
+    return variable_;
+  }
+
+  updateLoading(num: number) {
+    this.loading_num += num;
+  }
+
+  addSongToQueues(song: QueueTuple) {
+    this.addSongToQueue([...(song.slice(0, 5) as SearchTuple)]);
+    this.removeFromQueue(song[5]);
   }
 }

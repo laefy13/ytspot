@@ -16,6 +16,16 @@ module.exports = {
         hideController: "hideController 1s ease-in-out ",
         showButton: "showButton 1s ease-in-out",
         hideButton: "hideButton 1s ease-in-out ",
+        showSearchContainer: "showSearchContainer .3s ease-in-out",
+        hideSearchContainer: "hideSearchContainer .3s ease-in-out",
+        mobileShowSearchContainer: "mobileShowSearchContainer .3s ease-in-out",
+        mobileHideSearchContainer: "mobileHideSearchContainer .3s ease-in-out",
+        showSettingsContainer: "showSettingsContainer .3s ease-in-out",
+        hideSettingsContainer: "hideSettingsContainer .3s ease-in-out",
+        mobileShowSettingsContainer:
+          "mobileShowSettingsContainer .3s ease-in-out",
+        mobileHideSettingsContainer:
+          "mobileHideSearchContainer .3s ease-in-out",
       },
       keyframes: {
         marquee: {
@@ -50,6 +60,30 @@ module.exports = {
           "0%": { visibility: "hidden" },
           "100%": { visibility: "show" },
         },
+        hideSearchContainer: {
+          "0%": { transform: "translateX(0vw)" },
+          "100%": { transform: "translateX(-21vw)" },
+        },
+        showSearchContainer: {
+          "0%": { transform: "translateX(-20vw)" },
+          "100%": { transform: "translateX(0vw)" },
+        },
+        mobileHideSearchContainer: {
+          "0%": { transform: "translateX(0vw)" },
+          "100%": { transform: "translateX(-100vw)" },
+        },
+        mobileShowSearchContainer: {
+          "0%": { transform: "translateX(-100vw)" },
+          "100%": { transform: "translateX(0vw)" },
+        },
+        hideSettingsContainer: {
+          "0%": { transform: "translateX(0vw)" },
+          "100%": { transform: "translateX(100vw)" },
+        },
+        showSettingsContainer: {
+          "0%": { transform: "translateX(100vw)" },
+          "100%": { transform: "translateX(0vw)" },
+        },
       },
       height: {
         "10per": "10%",
@@ -61,8 +95,16 @@ module.exports = {
       width: {
         "3/5": "60%",
         "30vw": "30vw",
+        "40vw": "40vw",
+        "50vw": "50vw",
+        "30%": "30%",
         "20%": "20%",
         "10%": "10%",
+        "20vw": "20vw",
+        "100vw": "100vw",
+        "100%": "100%",
+        "15%": "15%",
+        "fit-content": "fit-content",
       },
       colors: {
         darkgreen: "#19282F",

@@ -1,10 +1,10 @@
 <div class="w-full pb-2">
   <div
     class="login flex flex-col justify-center text-center"
-    *ngIf="access_token == null"
+    *ngIf="access_token === '' && !token_expired"
   >
     Need to login first to use Spotify webplayback
-    <a [href]="api_link + 'auth/login'">
+    <a [href]="login_link">
       <button
         type="button"
         class="w-3/12 focus:outline-none text-white bg-green hover:bg-green focus:ring-4 focus:ring-green font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green dark:hover:bg-green dark:focus:ring-green"
@@ -16,7 +16,7 @@
 
   <div
     class="image flex justify-center items-center flex-col w-full"
-    *ngIf="access_token"
+    *ngIf="access_token !== '' && !token_expired"
   >
     <button
       class="logout w-3/12 focus:outline-none text-white bg-green hover:bg-green focus:ring-4 focus:ring-green font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green dark:hover:bg-green dark:focus:ring-green"
@@ -68,5 +68,22 @@
         [additional_text]="'Spotify Device loading'"
       />
     </div>
+  </div>
+
+  <div
+    class="refresh-container flex flex-col h-4/5 items-center p-5 w-full relative justify-center"
+    *ngIf="access_token && token_expired"
+  >
+    <button
+      [ngClass]="token_refreshing ? 'shadow-md opacity-20' : ''"
+      class="refresh w-fit-content focus:outline-none text-white bg-green hover:bg-green focus:ring-4 focus:ring-green font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green dark:hover:bg-green dark:focus:ring-green"
+      (click)="refreshToken()"
+    >
+      Refresh token
+    </button>
+    <app-loading
+      [is_loading]="token_refreshing"
+      [additional_text]="'Trying to refresh token...'"
+    />
   </div>
 </div>
