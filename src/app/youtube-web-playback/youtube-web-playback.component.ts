@@ -55,12 +55,12 @@ export class YoutubeWebPlaybackComponent {
       }
     );
   }
-  updateClasses(player_type: number, playerState: number) {
+  updateClasses(player_type: number, player_state: number) {
     const iFrame = this.player.getIframe();
     switch (player_type) {
       case 1: {
         const classes = ['h-50'];
-        if (playerState !== 0) classes.push('animate-fadeOut');
+        if (player_state !== 0) classes.push('animate-fadeOut');
         iFrame.classList.add(...classes);
         iFrame.classList.remove('animate-fadeIn', 'h-30vh');
         return false;

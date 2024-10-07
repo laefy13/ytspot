@@ -18,8 +18,9 @@ export class SpotifyService {
   updateCurrentTrackId() {
     this.currentPlayerTrackId.next();
   }
-  playOne(track_uri: string): Observable<any> {
-    const [device_id, headers] = this.getVar();
+
+  playOne(track_uri: string, access_token: string): Observable<any> {
+    const [device_id, headers] = this.getVar(access_token);
     const body = {
       uris: [`spotify:track:${track_uri}`],
       position_ms: 0,
@@ -33,11 +34,10 @@ export class SpotifyService {
     );
   }
 
-  private getVar() {
-    const token = store.default.get('access_token');
+  private getVar(access_token: string) {
     const device_id = store.default.get('device_id');
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${access_token}`,
     });
     return [device_id, headers];
   }

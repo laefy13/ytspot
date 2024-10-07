@@ -171,6 +171,11 @@ body {
   margin-top: 0;
   gap: 2rem;
 }
+.playlist-container {
+  width: 100%;
+  overflow-y: scroll;
+  height: 30vh;
+}
 
 @media screen and (max-width: 768px) {
   ::-webkit-scrollbar {
@@ -178,5 +183,8 @@ body {
   }
   .example-list {
     width: 100%;
+  }
+  .settings-container {
+    height: 20vh;
   }
 }

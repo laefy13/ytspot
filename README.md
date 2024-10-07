@@ -35,6 +35,16 @@ Deployed here -> https://zealous-bay-0c9670c00.5.azurestaticapps.net/
          * if on, the server will return the saved playlist, which means, any new changes after the last retrieve of that playlist without cache, will not be sent. 
          * if off the usual
       * when in mobile, made the scroll bar bigger (i dunno if because i have fat finger or something but i cant scroll in mobile)
+      * volume is saved locally
+   * 10/7/2024
+      * Changed the 2 playlists to a component where the user can add multiple playlists
+         * still only supports yt and spot
+         * The new "Save" button per playlist will save the playlist and the type of it locally, so when user visited the site again in the same browser, it will load saved playlist
+      * Settings button where a navbar will show the three switches mentioned on 10/01/2024 update
+      * Fixed the refresh function
+      * New button in the queue items. When clicked it will move the item to the top of the queue
+      * Fixed the bug where if the user used the immediate play function at the start, paused then play again, the next song will play.
+      * made the GUI uglier
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.2.
 

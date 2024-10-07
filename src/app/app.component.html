@@ -81,7 +81,7 @@
         (click)="getTime = flipBool('getTime', getTime)"
       ></div>
       <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-        >time</span
+        >Show Time</span
       >
     </div>
 
@@ -92,7 +92,7 @@
         (click)="spotifyCached = flipBool('spotifyCached', spotifyCached)"
       ></div>
       <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-        spotify cache</span
+        Spotify cache</span
       >
     </div>
 
@@ -103,7 +103,7 @@
         (click)="youtubeCached = flipBool('youtubeCached', youtubeCached)"
       ></div>
       <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-        >youtube cache</span
+        >Youtube cache</span
       >
     </div>
   </div>
@@ -122,9 +122,24 @@
       'w-100vw':isMobile,
     }"
   >
-    <input type="text" [formControl]="search_name" />
+    <input type="text" [formControl]="search_name" (keydown.enter)="search()" />
     <button (click)="search()" [disabled]="spotify_loading || youtube_loading">
-      search
+      <svg
+        class="w-6 h-6 text-gray-800 dark:text-white"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-width="2"
+          d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+        />
+      </svg>
     </button>
 
     <span> {{ search_added_status }} </span>
@@ -179,98 +194,22 @@
   </div>
 
   <div class="flex h-screen sm:flex-row flex-col mb-30 sm:mb-0">
-    <div class="flex flex-col md:w-1/2 p-10 w-full">
-      <div class="spotify w-full flex flex-col">
-        <div class="flex flex-col">
-          <label
-            for="success"
-            class="flex mb-2 text-sm font-medium text-green dark:text-green"
-            >Spotify playlist link</label
-          >
-          <div
-            class="input flex items-center md:justify-between flex-col md:flex-row"
-          >
-            <div class="relative items-center w-full md:w-8/12">
-              <input
-                type="text"
-                id="success"
-                [ngClass]="spotify_loading ? 'shadow-md opacity-20' : ''"
-                class="bg-green w-full border border-green text-green dark:text-green placeholder-green dark:placeholder-red text-sm rounded-lg focus:ring-red focus:border-green block p-2.5 dark:bg-transparent dark:border-green"
-                placeholder="Spotify playlist Link"
-                [formControl]="spotify_link"
-                value="https://open.spotify.com/playlist/1gKIYxGVZBUpkmqamRa60w?si=655b6326c62f4a51"
-                (click)="clearInput(spotify_link)"
-                [readonly]="spotify_loading"
-              />
-
-              <app-loading [is_loading]="spotify_loading" />
-            </div>
-            <button
-              type="button"
-              class="w-3/12 focus:outline-none text-white bg-green hover:bg-green focus:ring-4 focus:ring-green font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green dark:hover:bg-green dark:focus:ring-green"
-              (click)="getDataFromApi(false)"
-              [disabled]="spotify_loading"
-            >
-              Add Playlist
-            </button>
-          </div>
-        </div>
-        <div
-          class="mb-5 text-white"
-          [style.min-height.px]="spotify_message ? 'auto' : '30'"
-        >
-          {{ spotify_message }}
-        </div>
-      </div>
-
-      <div class="youtube w-full flex flex-col">
-        <div class="flex flex-col">
-          <label
-            for="error"
-            class="flex block mb-2 text-sm font-medium text-red dark:text-red"
-            >Youtube playlist link</label
-          >
-          <div
-            class="input flex items-center md:justify-between flex-col md:flex-row"
-          >
-            <div class="relative items-center w-full md:w-8/12">
-              <input
-                type="text"
-                id="error"
-                [ngClass]="youtube_loading ? 'shadow-md opacity-20' : ''"
-                class="w-full bg-red border border-red text-red placeholder-red text-sm rounded-lg focus:ring-red dark:bg-transparent focus:border-red block p-2.5 dark:text-red dark:placeholder-red dark:border-red"
-                placeholder="Youtube playlist Link"
-                [formControl]="youtube_link"
-                [value]="
-                  'https://youtube.com/playlist?list=PL4xFhy5pDwEiI2FWxPOBpdwiY-Ju5uIZW&si=Amms7BzTLGVt5Reo'
-                "
-                [readonly]="youtube_loading"
-                (click)="clearInput(youtube_link)"
-              />
-              <app-loading [is_loading]="youtube_loading" />
-            </div>
-
-            <button
-              type="button"
-              class="w-3/12 focus:outline-none text-white bg-red hover:bg-red focus:ring-4 focus:ring-red font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-red dark:hover:bg-red dark:focus:ring-red"
-              (click)="getDataFromApi(true)"
-              [disabled]="youtube_loading"
-            >
-              Add playlist
-            </button>
-          </div>
-        </div>
-        <div
-          class="mb-5 text-white"
-          [style.min-height.px]="youtube_message ? 'auto' : '30'"
-        >
-          {{ youtube_message }}
-        </div>
+    <div class="main-container flex flex-col md:w-1/2 p-10 w-full">
+      <div
+        class="playlist-container border border-lightgreen flex flex-col items-center"
+      >
+        <app-playlist-container
+          [urls]="urls"
+          [youtubeCached]="youtubeCached"
+          [spotifyCached]="spotifyCached"
+          [getTime]="getTime"
+          (notifyParent)="makeQueue()"
+          (updateLoading)="updateLoading($event)"
+        ></app-playlist-container>
       </div>
 
       <div class="players flex justify-center flex-col" id="players">
         <app-spotify-web-playback
-          [player_state]="player_state"
           [img_url]="img_url"
           [update_class]="update_class"
         />
@@ -306,9 +245,7 @@
         <div
           cdkDropList
           (cdkDropListDropped)="drop($event)"
-          [ngClass]="
-            spotify_loading || youtube_loading ? 'shadow-md opacity-20' : ''
-          "
+          [ngClass]="loading_num > 0 ? 'shadow-md opacity-20' : ''"
           class="example-list min-w-1/2 w-fit overflow-y-auto w-1/2 border border-lightgreen h-full bg-transparent relative items-center"
           [cdkDropListAutoScrollDisabled]="false"
           cdkScrollable
@@ -327,7 +264,7 @@
               {{ song[2] }}
             </div>
             <div class="song-buttons">
-              <button (click)="immediatePlay(song[4])">
+              <button (click)="immediatePlay(song[5])">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -338,7 +275,27 @@
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </button>
-              <button (click)="removeFromQueue(song[4])">
+
+              <button (click)="addSongToQueues(song)">
+                <svg
+                  class="w-6 h-6 text-gray-800 dark:text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m5 15 7-7 7 7"
+                  />
+                </svg>
+              </button>
+              <button (click)="removeFromQueue(song[5])">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   x="0px"
@@ -354,13 +311,13 @@
               </button>
             </div>
             <div class="time" *ngIf="getTime">
-              {{ song[3] }}
+              {{ song[4] }}
             </div>
           </div>
           }}
         </div>
         <app-loading
-          [is_loading]="spotify_loading || youtube_loading"
+          [is_loading]="loading_num > 0"
           [additional_text]="'Getting data & making new queue'"
         />
       </div>
@@ -386,14 +343,14 @@
           class="song overflow-y-hidden hidden"
           [ngClass]="
             showControllers
-              ? ' w-20 sm:block lg:hidden xl:block'
-              : ' w-40 sm:inline lg:hidden xl:inline'
+              ? ' w-20 sm:block lg:block xl:block'
+              : ' w-40 sm:inline lg:inline xl:inline'
           "
         >
           <div class="text-center">Playing:</div>
 
           <div
-            class="song animate-marquee whitespace-nowrap w-100vw text-center"
+            class="song animate-marquee whitespace-nowrap w-30vw text-center"
           >
             {{ playing_song }}
           </div>

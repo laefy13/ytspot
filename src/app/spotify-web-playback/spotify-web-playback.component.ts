@@ -1,6 +1,6 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SpotifyService } from '../services/spotify.service';
 import * as store from 'store2';
@@ -8,6 +8,8 @@ import { Inject, PLATFORM_ID } from '@angular/core';
 import { LoadingComponent } from '../loading/loading.component';
 import { environment } from '../../environments/environment';
 import { FormsModule } from '@angular/forms';
+import { v6 as uuidv6 } from 'uuid';
+
 declare global {
   interface Window {
     Spotify: any;
@@ -30,13 +32,14 @@ export class SpotifyWebPlaybackComponent implements OnInit {
   player: any;
   api_link = environment.API_URL;
   login_link = this.api_link + 'auth/login/';
-  access_token: string | null = null;
+  access_token: string = '';
   spotify_volume = 50;
   private position_changed = false;
   device_ready = false;
   spot_to_yt = false;
   token_expired = false;
   isBrowser: boolean;
+  token_refreshing = false;
   constructor(
     private http: HttpClient,
     private route: ActivatedRoute,
@@ -48,31 +51,37 @@ export class SpotifyWebPlaybackComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    if (!this.isBrowser) return;
     let id = store.default.get('id');
     let browser_id = store.default.get('browser-id');
-    browser_id = browser_id === null ? 'a1' : browser_id; //randomstring.generate(255) : browser_id;
-    store.default.set('browser-id', browser_id);
+    if (browser_id === null) {
+      browser_id = uuidv6();
+      store.default.set('browser-id', browser_id);
+    }
     this.login_link += browser_id;
 
     if (id === null) {
-      if (this.isBrowser) {
-        this.route.queryParams.subscribe(async (params) => {
-          if ('id' in params) id = params['id'];
-          else return;
+      this.route.queryParams.subscribe(async (params) => {
+        if ('id' in params) id = params['id'];
+        else return;
 
-          store.default.set('id', id);
-          await this.getToken(id, browser_id);
+        store.default.set('id', id);
+        await this.getToken(id, browser_id);
+
+        this.router.navigate([], {
+          queryParams: {
+            id: null,
+          },
+          queryParamsHandling: 'merge',
         });
-      } else {
-      }
+      });
     } else {
       await this.getToken(id, browser_id);
     }
   }
 
-  private async getToken(id: any, browser_id: any): Promise<void> {
-    // id = store.default.get('id');
-    if (id === null) return;
+  private async getToken(id: string, browser_id: string): Promise<void> {
+    if (id === null || browser_id === null) return;
     const link = this.api_link + 'token';
     const headers = new HttpHeaders({
       'X-Spotify-UUID': id,
@@ -81,56 +90,47 @@ export class SpotifyWebPlaybackComponent implements OnInit {
     this.http.get<any>(link, { headers }).subscribe({
       next: (response) => {
         const access_token = response.token;
-        if (access_token === null) {
+        if (response.expired) {
+          this.access_token = access_token;
+          this.token_expired = true;
           return null;
-        }
-        this.access_token = access_token;
-        store.default.set('access_token', access_token);
+        } else if (access_token === null) return null;
 
-        this.router.navigate([], {
-          queryParams: {
-            id: null,
-          },
-          queryParamsHandling: 'merge',
-        });
+        this.access_token = access_token;
+
         this.initializeSpotifyPlayer();
         return;
       },
       error: (error) => {
-        this.logout();
         return;
       },
     });
   }
+
   private initializeSpotifyPlayer() {
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.async = true;
     document.body.appendChild(script);
 
+    const temp_vol = store.default.get('spot-volume');
+    this.spotify_volume = temp_vol ? temp_vol : this.spotify_volume;
     window.onSpotifyWebPlaybackSDKReady = () => {
       this.player = new window.Spotify.Player({
         name: 'Web Playback SDK',
         getOAuthToken: (cb: (arg0: any) => void) => {
           cb(this.access_token);
         },
-        volume: 1,
+        volume: this.spotify_volume / 100,
       });
 
       this.player.addListener('ready', ({ device_id }: any) => {
         store.default.set('device_id', device_id);
       });
 
-      // this.player.addListener('not_ready', ({ device_id }: any) => {
-      //   console.log('Device ID has gone offline', device_id);
-      // });
-
       this.player.connect().then((success: any) => {
         if (success) {
           this.device_ready = true;
-          const temp_vol = store.default.get('spot-volume');
-          this.spotify_volume = temp_vol ? temp_vol : this.spotify_volume;
-          this.updateVolume();
         }
       });
       this.player.addListener(
@@ -152,14 +152,31 @@ export class SpotifyWebPlaybackComponent implements OnInit {
       );
     };
   }
+
   positionChange(is_changed: boolean) {
     this.position_changed = is_changed;
   }
+
   logout() {
-    store.default.remove('access_token');
+    let id = store.default.get('id');
+    let browser_id = store.default.get('browser-id');
+
+    const link = this.api_link + 'auth/logout?code=' + this.access_token;
+    const headers = new HttpHeaders({
+      'X-Spotify-UUID': id,
+      'X-Browser-ID': browser_id,
+    });
+
     store.default.remove('id');
-    store.default.remove('browser-id');
-    this.access_token = null;
+    this.access_token = '';
+    this.http.get<any>(link, { headers }).subscribe({
+      next: (response) => {
+        return;
+      },
+      error: (error) => {
+        return;
+      },
+    });
   }
 
   pauseDevice() {
@@ -167,16 +184,17 @@ export class SpotifyWebPlaybackComponent implements OnInit {
       this.positionChange(false);
     });
   }
+
   playDevice() {
     this.player.resume().then(() => {});
   }
+
   playOne(id: string) {
     this.spot_to_yt = true;
-    this.spotifyService.playOne(id).subscribe({
+    this.spotifyService.playOne(id, this.access_token).subscribe({
       error: () => {
-        // ask if user wants to refresh token and play it
-        // or if autorefresh then do it auto
         this.token_expired = true;
+        return true;
       },
     });
     return false;
@@ -190,38 +208,26 @@ export class SpotifyWebPlaybackComponent implements OnInit {
       'X-Spotify-UUID': id,
       'X-Browser-ID': browser_id,
     });
+    this.token_refreshing = true;
     this.http.get<any>(link, { headers }).subscribe({
       next: (response) => {
         const access_token = response.token;
         if (access_token === null) {
-          return null;
+          return;
         }
         this.access_token = access_token;
-        store.default.set('access_token', access_token);
         this.token_expired = false;
         this.initializeSpotifyPlayer();
+
+        this.token_refreshing = false;
         return;
       },
       error: (error) => {
-        this.logout();
         return;
       },
     });
   }
 
-  private getIdFromUri(uri: string): string {
-    const type = uri.includes('/playlist')
-      ? 'playlist'
-      : uri.includes('/track')
-      ? 'track'
-      : 'album';
-    const regex = new RegExp(`\/${type}\/([a-zA-Z0-9]+)`);
-    const match = uri.match(regex);
-    if (match && match.length >= 2) {
-      return match[1];
-    }
-    return '';
-  }
   updateVolume() {
     const computed_vol = this.spotify_volume / 100;
     this.player.setVolume(computed_vol);
